@@ -1,160 +1,297 @@
 "use client"
+
+import type React from "react"
+
+import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Upload, FileText, BarChart3, Shield } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { ArrowLeft, Send, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { useRouter } from "next/navigation"
 
-export default function HomePage() {
+interface JobFormData {
+  title: string
+  location: string
+  company_profile: string
+  description: string
+  requirements: string
+  benefits: string
+  employment_type: string
+  required_experience: string
+  required_education: string
+  industry: string
+  function: string
+  telecommuting: number
+  has_company_logo: number
+}
+
+export default function PredictFormPage() {
+  const router = useRouter()
+  const [loading, setLoading] = useState(false)
+  const [formData, setFormData] = useState<JobFormData>({
+    title: "",
+    location: "",
+    company_profile: "",
+    description: "",
+    requirements: "",
+    benefits: "",
+    employment_type: "",
+    required_experience: "",
+    required_education: "",
+    industry: "",
+    function: "",
+    telecommuting: 0,
+    has_company_logo: 0,
+  })
+
+  const handleInputChange = (field: keyof JobFormData, value: string | number) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }))
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 2000))
+
+    // Store form data in localStorage for the results page
+    localStorage.setItem(
+      "predictionData",
+      JSON.stringify({
+        type: "single",
+        data: formData,
+        result: {
+          prediction: Math.random() > 0.7 ? "Fraudulent" : "Genuine",
+          probability: Math.random(),
+          confidence: 0.85 + Math.random() * 0.15,
+        },
+      }),
+    )
+
+    router.push("/results")
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div className="flex items-center space-x-3">
-            <Shield className="h-8 w-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Job Fraud Detection System</h1>
+            <Link href="/">
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Home
+              </Button>
+            </Link>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Job Analysis Form</h1>
           </div>
           <ThemeToggle />
         </div>
 
-        {/* Hero Section */}
-        <div className="text-center mb-12">
-          <h2 className="text-5xl font-bold text-gray-900 dark:text-white mb-4">
-            Protect Against Fraudulent Job Postings
-          </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-            Advanced machine learning system to detect and analyze fraudulent job postings with real-time insights and
-            comprehensive reporting.
-          </p>
-        </div>
+        <Card className="max-w-4xl mx-auto">
+          <CardHeader>
+            <CardTitle>Enter Job Details for Analysis</CardTitle>
+            <CardDescription>
+              Fill out the form below to analyze a job posting for potential fraud indicators
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="title">Job Title *</Label>
+                  <Input
+                    id="title"
+                    value={formData.title}
+                    onChange={(e) => handleInputChange("title", e.target.value)}
+                    placeholder="e.g., Software Engineer"
+                    required
+                  />
+                </div>
 
-        {/* Feature Cards */}
-        <div className="grid md:grid-cols-2 gap-8 mb-12">
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <div className="flex items-center space-x-3">
-                <FileText className="h-8 w-8 text-green-600" />
-                <div>
-                  <CardTitle>Single Job Analysis</CardTitle>
-                  <CardDescription>Analyze individual job postings by filling out a detailed form</CardDescription>
+                <div className="space-y-2">
+                  <Label htmlFor="location">Location *</Label>
+                  <Input
+                    id="location"
+                    value={formData.location}
+                    onChange={(e) => handleInputChange("location", e.target.value)}
+                    placeholder="e.g., New York, NY"
+                    required
+                  />
                 </div>
               </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 dark:text-gray-300 mb-4">
-                Enter job details manually and get instant fraud probability analysis with detailed insights and
-                recommendations.
-              </p>
-              <Link href="/predict-form">
-                <Button className="w-full">
-                  <FileText className="mr-2 h-4 w-4" />
-                  Analyze Single Job
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
 
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <div className="flex items-center space-x-3">
-                <Upload className="h-8 w-8 text-blue-600" />
-                <div>
-                  <CardTitle>Batch CSV Analysis</CardTitle>
-                  <CardDescription>Upload CSV files for bulk job posting analysis</CardDescription>
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="company_profile">Company Profile</Label>
+                <Textarea
+                  id="company_profile"
+                  value={formData.company_profile}
+                  onChange={(e) => handleInputChange("company_profile", e.target.value)}
+                  placeholder="Brief description of the hiring company..."
+                  rows={3}
+                />
               </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 dark:text-gray-300 mb-4">
-                Upload CSV files containing multiple job postings and get comprehensive analysis with detailed reporting
-                and visualizations.
-              </p>
-              <Link href="/upload-csv">
-                <Button className="w-full" variant="outline">
-                  <Upload className="mr-2 h-4 w-4" />
-                  Upload CSV File
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        </div>
 
-        {/* Statistics Section */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 mb-12">
-          <h3 className="text-2xl font-bold text-center mb-8 text-gray-900 dark:text-white">System Performance</h3>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600 mb-2">94.2%</div>
-              <div className="text-gray-600 dark:text-gray-300">Accuracy</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-green-600 mb-2">91.8%</div>
-              <div className="text-gray-600 dark:text-gray-300">Precision</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-purple-600 mb-2">89.5%</div>
-              <div className="text-gray-600 dark:text-gray-300">Recall</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-orange-600 mb-2">90.6%</div>
-              <div className="text-gray-600 dark:text-gray-300">F1-Score</div>
-            </div>
-          </div>
-        </div>
+              <div className="space-y-2">
+                <Label htmlFor="description">Job Description *</Label>
+                <Textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => handleInputChange("description", e.target.value)}
+                  placeholder="Detailed job description..."
+                  rows={4}
+                  required
+                />
+              </div>
 
-        {/* Features List */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
-          <h3 className="text-2xl font-bold text-center mb-8 text-gray-900 dark:text-white">Key Features</h3>
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div className="flex items-start space-x-3">
-                <BarChart3 className="h-6 w-6 text-blue-600 mt-1" />
-                <div>
-                  <h4 className="font-semibold text-gray-900 dark:text-white">Real-time Analysis</h4>
-                  <p className="text-gray-600 dark:text-gray-300">Instant fraud detection with probability scores</p>
+              <div className="space-y-2">
+                <Label htmlFor="requirements">Requirements</Label>
+                <Textarea
+                  id="requirements"
+                  value={formData.requirements}
+                  onChange={(e) => handleInputChange("requirements", e.target.value)}
+                  placeholder="Required qualifications and skills..."
+                  rows={3}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="benefits">Benefits</Label>
+                <Textarea
+                  id="benefits"
+                  value={formData.benefits}
+                  onChange={(e) => handleInputChange("benefits", e.target.value)}
+                  placeholder="Offered benefits and perks..."
+                  rows={3}
+                />
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="employment_type">Employment Type</Label>
+                  <Select onValueChange={(value) => handleInputChange("employment_type", value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select employment type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Full-time">Full-time</SelectItem>
+                      <SelectItem value="Part-time">Part-time</SelectItem>
+                      <SelectItem value="Contract">Contract</SelectItem>
+                      <SelectItem value="Temporary">Temporary</SelectItem>
+                      <SelectItem value="Internship">Internship</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="required_experience">Required Experience</Label>
+                  <Select onValueChange={(value) => handleInputChange("required_experience", value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select experience level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Entry level">Entry level</SelectItem>
+                      <SelectItem value="Mid level">Mid level</SelectItem>
+                      <SelectItem value="Senior level">Senior level</SelectItem>
+                      <SelectItem value="Executive">Executive</SelectItem>
+                      <SelectItem value="Not Applicable">Not Applicable</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
-              <div className="flex items-start space-x-3">
-                <BarChart3 className="h-6 w-6 text-green-600 mt-1" />
-                <div>
-                  <h4 className="font-semibold text-gray-900 dark:text-white">Interactive Dashboard</h4>
-                  <p className="text-gray-600 dark:text-gray-300">Comprehensive visualizations and insights</p>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="required_education">Required Education</Label>
+                  <Select onValueChange={(value) => handleInputChange("required_education", value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select education level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="High School">High School</SelectItem>
+                      <SelectItem value="Bachelor's Degree">Bachelor's Degree</SelectItem>
+                      <SelectItem value="Master's Degree">Master's Degree</SelectItem>
+                      <SelectItem value="PhD">PhD</SelectItem>
+                      <SelectItem value="Professional">Professional</SelectItem>
+                      <SelectItem value="Not Specified">Not Specified</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="industry">Industry</Label>
+                  <Input
+                    id="industry"
+                    value={formData.industry}
+                    onChange={(e) => handleInputChange("industry", e.target.value)}
+                    placeholder="e.g., Technology, Healthcare"
+                  />
                 </div>
               </div>
-              <div className="flex items-start space-x-3">
-                <BarChart3 className="h-6 w-6 text-purple-600 mt-1" />
-                <div>
-                  <h4 className="font-semibold text-gray-900 dark:text-white">Batch Processing</h4>
-                  <p className="text-gray-600 dark:text-gray-300">Analyze multiple job postings simultaneously</p>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="function">Job Function</Label>
+                  <Input
+                    id="function"
+                    value={formData.function}
+                    onChange={(e) => handleInputChange("function", e.target.value)}
+                    placeholder="e.g., Engineering, Marketing"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="telecommuting">Remote Work Allowed</Label>
+                  <Select onValueChange={(value) => handleInputChange("telecommuting", Number.parseInt(value))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select option" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">Yes</SelectItem>
+                      <SelectItem value="0">No</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
-            </div>
-            <div className="space-y-4">
-              <div className="flex items-start space-x-3">
-                <BarChart3 className="h-6 w-6 text-orange-600 mt-1" />
-                <div>
-                  <h4 className="font-semibold text-gray-900 dark:text-white">Model Retraining</h4>
-                  <p className="text-gray-600 dark:text-gray-300">Continuous learning from new data</p>
-                </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="has_company_logo">Company Has Logo</Label>
+                <Select onValueChange={(value) => handleInputChange("has_company_logo", Number.parseInt(value))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select option" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">Yes</SelectItem>
+                    <SelectItem value="0">No</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              <div className="flex items-start space-x-3">
-                <BarChart3 className="h-6 w-6 text-red-600 mt-1" />
-                <div>
-                  <h4 className="font-semibold text-gray-900 dark:text-white">Detailed Reports</h4>
-                  <p className="text-gray-600 dark:text-gray-300">Comprehensive analysis and recommendations</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <BarChart3 className="h-6 w-6 text-indigo-600 mt-1" />
-                <div>
-                  <h4 className="font-semibold text-gray-900 dark:text-white">Export Capabilities</h4>
-                  <p className="text-gray-600 dark:text-gray-300">Download results and reports</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Analyzing Job Posting...
+                  </>
+                ) : (
+                  <>
+                    <Send className="mr-2 h-4 w-4" />
+                    Analyze Job Posting
+                  </>
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )
