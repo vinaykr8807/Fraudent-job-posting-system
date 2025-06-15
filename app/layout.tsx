@@ -7,8 +7,8 @@ import { ThemeProvider } from "@/components/theme-provider"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Fraud Detection System",
-  description: "AI-powered job posting fraud detection system",
+  title: "Job Fraud Detection System",
+  description: "Advanced machine learning system to detect fraudulent job postings",
     generator: 'v0.dev'
 }
 
